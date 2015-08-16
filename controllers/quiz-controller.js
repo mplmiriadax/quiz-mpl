@@ -1,5 +1,6 @@
 var models = require('../models/models.js');
 
+// Autoload - factoriza el código si ruta incluye :quizId
 exports.load = function(req, res, next, quizId) {
   models.Quiz.findById(quizId).then(
     function(quiz) {
@@ -13,10 +14,24 @@ exports.load = function(req, res, next, quizId) {
   ).catch(function(error){next(error)});
 };
 
+// GET /quizes
 exports.index = function (req, res){
-  models.Quiz.findAll().then(function(quizes){
-    res.render('quizes/index', {quizes: quizes, errors: []});
-  }).catch(function(error){next(error);})
+  console.log(req.query.search);
+  if (req.query.search){
+    var search = req.query.search.replace(/\s+/g, "%");
+    console.log(search);
+    models.Quiz.findAll({where: ["upper(pregunta) like ?", "%"
+        + search.toUpperCase() + "%"],order: 'pregunta ASC'})
+      .then(function(quizes){
+        res.render('quizes/index',{quizes:quizes, errors: []});
+      }
+    ).catch(function(error){next(error);})
+  }else{
+    models.Quiz.findAll({order: 'pregunta ASC'})
+    .then(function(quizes){
+      res.render('quizes/index', {quizes: quizes, errors: []});
+    }).catch(function(error){next(error);})
+  }
 } ;
 
 // GET /quizes/:id
