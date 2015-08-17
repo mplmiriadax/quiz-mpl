@@ -10,7 +10,8 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Quiz - MPL', errors: [] });
 });
 
-router.param('quizId', quizController.load);
+router.param('quizId', quizController.load); // autoload quizId
+router.param('commentId', commentController.load); // autoload commentId
 
 //router.get('/quizes/question', quizController.question);
 //router.get('/quizes/answer', quizController.answer);
@@ -35,6 +36,7 @@ router.get('/author', function(req, res) {
 // Definición de rutas de comentarios
 router.get('/quizes/:quizId(\\d+)/comments/new', commentController.new);
 router.post('/quizes/:quizId(\\d+)/comments', commentController.create);
+router.get('/quizes/:quizId(\\d+)/comments/:commentId(\\d+)/publish', sessionController.loginRequired, commentController.publish);
 
 // Definición de rutas de sesion
 router.get('/login', sessionController.new);
