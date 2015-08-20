@@ -29,14 +29,42 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Helpers dinamicos:
 app.use(function(req, res, next) {
+
+  // Si hay sesion controlamos que no esté inactivo
+  if(req.session.user
+  && req.session.tiempo
+   && !req.path.match(/\/login|\/logout/)){
+     var tiempoAct = new Date();
+    var tiempoActual = tiempoAct.getTime();
+    var tiempoAnt = req.session.tiempo;
+    console.log("tiempoAct"+tiempoAct/1000);
+    console.log("tiempoAnt" + tiempoAnt/1000);
+
+    if (tiempoAct/1000 - tiempoAnt/1000 > 30){
+      delete req.session.user;
+      req.session.tiempo=tiempoActual;
+    }else{
+      req.session.tiempo=tiempoActual;
+    }
+  }else if (!req.session.tiempo) {
+    var tiempoAct = new Date();
+    req.session.tiempo = tiempoAct.getTime();
+  }
+
   // si no existe lo inicializa
   if (!req.session.redir) {
     req.session.redir = '/';
   }
+
+
+
   // guardar path en session.redir para despues de login
   if (!req.path.match(/\/login|\/logout/)) {
     req.session.redir = req.path;
   }
+
+
+
   // Hacer visible req.session en las vistas
   res.locals.session = req.session;
   next();
